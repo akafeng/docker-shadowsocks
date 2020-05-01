@@ -1,0 +1,44 @@
+name: Docker Build
+
+on:
+  push:
+    branches:
+      - '**'
+    paths:
+      - 'Dockerfile'
+      - 'docker-*'
+
+env:
+  USERNAME: akafeng
+  REPOSITORY: shadowsocks
+  GITHUB_PACKAGE_REGISTRY: docker.pkg.github.com
+
+jobs:
+  build:
+    name: Build Testing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.1.0
+
+      - name: Docker Login
+        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ${{ env.GITHUB_PACKAGE_REGISTRY }} -u ${{ env.USERNAME }} --password-stdin
+
+      - name: Docker Build
+        env:
+          STAGE_CACHE: ${{ env.GITHUB_PACKAGE_REGISTRY }}/${{ github.repository }}/${{ env.REPOSITORY }}:stage
+          LATEST_TAG: ${{ env.USERNAME }}/${{ env.REPOSITORY }}:latest
+        run: |
+          docker pull ${{ env.STAGE_CACHE }} || true
+          docker pull ${{ env.LATEST_TAG }} || true
+          docker build \
+            --target builder \
+            --cache-from=${{ env.STAGE_CACHE }} \
+            --tag=${{ env.STAGE_CACHE }} \
+            .
+          docker build \
+            --cache-from=${{ env.STAGE_CACHE }},${{ env.LATEST_TAG }} \
+            .
+
+      - name: Docker Publish
+        run: docker push ${{ env.GITHUB_PACKAGE_REGISTRY }}/${{ github.repository }}/${{ env.REPOSITORY }}
