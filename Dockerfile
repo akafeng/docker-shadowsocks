@@ -1,14 +1,14 @@
-FROM alpine:3.11 AS builder
+FROM alpine:3.12 AS builder
 
 LABEL maintainer="metowolf <i@i-meto.com>, akafeng <i@sjy.im>"
 
-ARG SS_VERSION="3.3.4"
-ARG SS_URL="https://github.com/shadowsocks/shadowsocks-libev.git"
+ARG SS_VERSION="3.3.5"
+ARG SS_URL="https://github.com/shadowsocks/shadowsocks-libev/releases/download/v$SS_VERSION/shadowsocks-libev-$SS_VERSION.tar.gz"
 
 ARG SIMPLE_OBFS_VERSION="master"
 ARG SIMPLE_OBFS_URL="https://github.com/shadowsocks/simple-obfs.git"
 
-ARG V2RAY_PLUGIN_VERSION="1.3.0"
+ARG V2RAY_PLUGIN_VERSION="1.3.1"
 ARG V2RAY_PLUGIN_URL="https://github.com/shadowsocks/v2ray-plugin/releases/download/v$V2RAY_PLUGIN_VERSION/v2ray-plugin-linux-amd64-v$V2RAY_PLUGIN_VERSION.tar.gz"
 
 RUN set -eux \
@@ -24,11 +24,9 @@ RUN set -eux \
         linux-headers \
         mbedtls-dev \
         pcre-dev \
-    && git clone "$SS_URL" \
-    && cd shadowsocks-libev \
-    && git checkout "v$SS_VERSION" \
-    && git submodule update --init --recursive \
-    && ./autogen.sh \
+    && wget "$SS_URL" \
+    && tar xzvf shadowsocks-libev*.tar.gz \
+    && cd shadowsocks-libev* \
     && ./configure --prefix=/usr/local --disable-documentation \
     && make install \
     && cd .. \
@@ -45,7 +43,7 @@ RUN set -eux \
 
 ######
 
-FROM alpine:3.11
+FROM alpine:3.12
 
 LABEL maintainer="metowolf <i@i-meto.com>, akafeng <i@sjy.im>"
 
