@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.1.0
+        uses: actions/checkout@v2.3.4
 
       - name: Docker Login
         run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ${{ env.GITHUB_PACKAGE_REGISTRY }} -u ${{ env.USERNAME }} --password-stdin
@@ -27,18 +27,14 @@ jobs:
       - name: Docker Build
         env:
           STAGE_CACHE: ${{ env.GITHUB_PACKAGE_REGISTRY }}/${{ github.repository }}/${{ env.REPOSITORY }}:stage
-          LATEST_TAG: ${{ env.USERNAME }}/${{ env.REPOSITORY }}:latest
         run: |
-          docker pull ${{ env.STAGE_CACHE }} || true
-          docker pull ${{ env.LATEST_TAG }} || true
           docker build \
             --target builder \
-            --cache-from=${{ env.STAGE_CACHE }} \
             --tag=${{ env.STAGE_CACHE }} \
             .
           docker build \
-            --cache-from=${{ env.STAGE_CACHE }},${{ env.LATEST_TAG }} \
+            --cache-from=${{ env.STAGE_CACHE }} \
             .
 
       - name: Docker Publish
-        run: docker push ${{ env.GITHUB_PACKAGE_REGISTRY }}/${{ github.repository }}/${{ env.REPOSITORY }}
+        run: docker push --all-tags ${{ env.GITHUB_PACKAGE_REGISTRY }}/${{ github.repository }}/${{ env.REPOSITORY }}

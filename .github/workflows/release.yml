@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.1.0
+        uses: actions/checkout@v2.3.4
 
       - name: Process Version
         id: version
@@ -30,20 +30,19 @@ jobs:
       - name: Docker Build
         env:
           STAGE_CACHE: ${{ env.GITHUB_PACKAGE_REGISTRY }}/${{ github.repository }}/${{ env.REPOSITORY }}:stage
-          LATEST_TAG: ${{ env.USERNAME }}/${{ env.REPOSITORY }}:latest
           MAJOR_TAG: ${{ env.USERNAME }}/${{ env.REPOSITORY }}:${{ steps.version.outputs.major }}
           MINOR_TAG: ${{ env.USERNAME }}/${{ env.REPOSITORY }}:${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}
           PATCH_TAG: ${{ env.USERNAME }}/${{ env.REPOSITORY }}:${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}.${{ steps.version.outputs.patch }}
+          LATEST_TAG: ${{ env.USERNAME }}/${{ env.REPOSITORY }}:latest
         run: |
           docker pull ${{ env.STAGE_CACHE }} || true
-          docker pull ${{ env.LATEST_TAG }} || true
           docker build \
-            --cache-from=${{ env.STAGE_CACHE }},${{ env.LATEST_TAG }} \
-            --tag=${{ env.LATEST_TAG }} \
+            --cache-from=${{ env.STAGE_CACHE }} \
             --tag=${{ env.MAJOR_TAG }} \
             --tag=${{ env.MINOR_TAG }} \
             --tag=${{ env.PATCH_TAG }} \
+            --tag=${{ env.LATEST_TAG }} \
             .
 
       - name: Docker Publish
-        run: docker push ${{ env.USERNAME }}/${{ env.REPOSITORY }}
+        run: docker push --all-tags ${{ env.USERNAME }}/${{ env.REPOSITORY }}
