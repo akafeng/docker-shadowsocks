@@ -3,13 +3,13 @@ FROM alpine:3.12 AS builder
 LABEL maintainer="metowolf <i@i-meto.com>, akafeng <i@sjy.im>"
 
 ARG SS_VERSION="3.3.5"
-ARG SS_URL="https://github.com/shadowsocks/shadowsocks-libev/releases/download/v$SS_VERSION/shadowsocks-libev-$SS_VERSION.tar.gz"
+ARG SS_URL="https://github.com/shadowsocks/shadowsocks-libev/releases/download/v${SS_VERSION}/shadowsocks-libev-${SS_VERSION}.tar.gz"
 
 ARG SIMPLE_OBFS_VERSION="master"
 ARG SIMPLE_OBFS_URL="https://github.com/shadowsocks/simple-obfs.git"
 
 ARG V2RAY_PLUGIN_VERSION="1.3.1"
-ARG V2RAY_PLUGIN_URL="https://github.com/shadowsocks/v2ray-plugin/releases/download/v$V2RAY_PLUGIN_VERSION/v2ray-plugin-linux-amd64-v$V2RAY_PLUGIN_VERSION.tar.gz"
+ARG V2RAY_PLUGIN_URL="https://github.com/shadowsocks/v2ray-plugin/releases/download/v${V2RAY_PLUGIN_VERSION}/v2ray-plugin-linux-amd64-v${V2RAY_PLUGIN_VERSION}.tar.gz"
 
 RUN set -eux \
     && apk add --no-cache \
@@ -24,21 +24,23 @@ RUN set -eux \
         linux-headers \
         mbedtls-dev \
         pcre-dev \
-    && wget "$SS_URL" \
-    && tar xzvf shadowsocks-libev*.tar.gz \
+    \
+    && wget -O shadowsocks-libev.tar.gz ${SS_URL} \
+    && tar -xzvf shadowsocks-libev.tar.gz \
     && cd shadowsocks-libev* \
     && ./configure --prefix=/usr/local --disable-documentation \
     && make install \
+    \
     && cd .. \
-    && git clone "$SIMPLE_OBFS_URL" \
+    && git clone --depth=1 --recurse-submodules --shallow-submodules ${SIMPLE_OBFS_URL} simple-obfs \
     && cd simple-obfs \
-    && git submodule update --init --recursive \
     && ./autogen.sh \
     && ./configure --prefix=/usr/local --disable-documentation \
     && make install \
+    \
     && cd .. \
-    && wget "$V2RAY_PLUGIN_URL" \
-    && tar xzvf v2ray-plugin*.tar.gz \
+    && wget -O v2ray-plugin.tar.gz ${V2RAY_PLUGIN_URL} \
+    && tar -xzvf v2ray-plugin.tar.gz \
     && mv v2ray-plugin_linux_amd64 /usr/local/bin/v2ray-plugin
 
 ######
@@ -57,16 +59,14 @@ ENV OBFS=
 ENV PLUGIN=
 ENV PLUGIN_OPTS=
 
-EXPOSE $SERVER_PORT/tcp
-EXPOSE $SERVER_PORT/udp
-
 COPY --from=builder /usr/local/bin/* /usr/local/bin/
+
 RUN set -eux \
-    && runDeps="$( \
+    && runDeps=$( \
         scanelf --needed --nobanner /usr/local/bin/ss-* \
         | awk '{ gsub(/,/, "\nso:", $2); print "so:" $2 }' \
         | sort -u \
-    )" \
+    ) \
     && apk add --no-cache \
         ca-certificates \
         rng-tools \
@@ -76,3 +76,6 @@ RUN set -eux \
 
 COPY docker-entrypoint.sh /usr/local/bin/
 ENTRYPOINT ["docker-entrypoint.sh"]
+
+EXPOSE $SERVER_PORT/tcp
+EXPOSE $SERVER_PORT/udp
