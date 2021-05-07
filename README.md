@@ -12,10 +12,10 @@
 </p>
 
 <p align="center">
-    <img src="https://img.shields.io/docker/v/akafeng/shadowsocks?sort=semver&style=flat-square" />
-    <img src="https://img.shields.io/docker/pulls/akafeng/shadowsocks?style=flat-square" />
-    <img src="https://img.shields.io/microbadger/layers/akafeng/shadowsocks?style=flat-square" />
-    <img src="https://img.shields.io/docker/image-size/akafeng/shadowsocks??sort=semver&style=flat-square" />
+    <img src="https://img.shields.io/docker/v/akafeng/shadowsocks?sort=semver" />
+    <img src="https://img.shields.io/docker/pulls/akafeng/shadowsocks" />
+    <img src="https://img.shields.io/microbadger/layers/akafeng/shadowsocks" />
+    <img src="https://img.shields.io/docker/image-size/akafeng/shadowsocks??sort=semver" />
 </p>
 
 ---
