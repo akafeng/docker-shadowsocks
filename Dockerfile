@@ -77,5 +77,5 @@ RUN set -eux \
 COPY docker-entrypoint.sh /usr/local/bin/
 ENTRYPOINT ["docker-entrypoint.sh"]
 
-EXPOSE $SERVER_PORT/tcp
-EXPOSE $SERVER_PORT/udp
+EXPOSE ${SERVER_PORT}/tcp
+EXPOSE ${SERVER_PORT}/udp
