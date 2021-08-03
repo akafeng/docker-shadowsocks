@@ -1,11 +1,13 @@
 FROM alpine:3.12 AS builder
 
-LABEL maintainer="metowolf <i@i-meto.com>, akafeng <i@sjy.im>"
+LABEL \
+    org.opencontainers.image.title="shadowsocks" \
+    org.opencontainers.image.authors="metowolf <i@i-meto.com>, akafeng <i@sjy.im>" \
+    org.opencontainers.image.source="https://github.com/akafeng/docker-shadowsocks"
 
 ARG SS_VERSION="3.3.5"
 ARG SS_URL="https://github.com/shadowsocks/shadowsocks-libev/releases/download/v${SS_VERSION}/shadowsocks-libev-${SS_VERSION}.tar.gz"
 
-ARG SIMPLE_OBFS_VERSION="master"
 ARG SIMPLE_OBFS_URL="https://github.com/shadowsocks/simple-obfs.git"
 
 ARG V2RAY_PLUGIN_VERSION="1.3.1"
@@ -47,7 +49,10 @@ RUN set -eux \
 
 FROM alpine:3.12
 
-LABEL maintainer="metowolf <i@i-meto.com>, akafeng <i@sjy.im>"
+LABEL \
+    org.opencontainers.image.title="shadowsocks" \
+    org.opencontainers.image.authors="metowolf <i@i-meto.com>, akafeng <i@sjy.im>" \
+    org.opencontainers.image.source="https://github.com/akafeng/docker-shadowsocks"
 
 ENV SERVER_ADDR="0.0.0.0"
 ENV SERVER_PORT="8388"
