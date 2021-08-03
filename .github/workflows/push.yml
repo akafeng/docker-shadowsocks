@@ -4,14 +4,13 @@ on:
   push:
     branches:
       - '**'
-    paths:
-      - 'Dockerfile'
-      - 'docker-*'
+    paths-ignore:
+      - 'README.md'
 
 env:
   USERNAME: akafeng
   REPOSITORY: shadowsocks
-  GITHUB_PACKAGE_REGISTRY: docker.pkg.github.com
+  PACKAGE_REGISTRY: ghcr.io
 
 jobs:
   build:
@@ -22,11 +21,11 @@ jobs:
         uses: actions/checkout@v2.3.4
 
       - name: Docker Login
-        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ${{ env.GITHUB_PACKAGE_REGISTRY }} -u ${{ env.USERNAME }} --password-stdin
+        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ${{ env.PACKAGE_REGISTRY }} -u ${{ env.USERNAME }} --password-stdin
 
       - name: Docker Build
         env:
-          STAGE_CACHE: ${{ env.GITHUB_PACKAGE_REGISTRY }}/${{ github.repository }}/${{ env.REPOSITORY }}:stage
+          STAGE_CACHE: ${{ env.PACKAGE_REGISTRY }}/${{ env.USERNAME }}/${{ env.REPOSITORY }}:stage
         run: |
           docker build \
             --target builder \
@@ -37,4 +36,4 @@ jobs:
             .
 
       - name: Docker Publish
-        run: docker push --all-tags ${{ env.GITHUB_PACKAGE_REGISTRY }}/${{ github.repository }}/${{ env.REPOSITORY }}
+        run: docker push --all-tags ${{ env.PACKAGE_REGISTRY }}/${{ env.USERNAME }}/${{ env.REPOSITORY }}
